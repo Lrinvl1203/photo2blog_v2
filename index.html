@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI 블로그 자동 생성기 - 사진만으로 완벽한 포스팅 작성</title>
+    
+    <!-- Supabase JavaScript SDK -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    
     <style>
         * {
             margin: 0;
@@ -1095,6 +1099,14 @@
                         <option value="fr">Français</option>
                     </select>
                     <button id="apiSetupBtn" class="btn btn-secondary btn-small" data-i18n="api_setup_button">🔑 API</button>
+                    <div id="authContainer">
+                        <button id="loginBtn" class="btn btn-primary btn-small">🔐 로그인</button>
+                        <div id="userProfile" class="user-profile" style="display: none;">
+                            <div class="user-avatar">👤</div>
+                            <span id="userEmail" class="user-email"></span>
+                            <button id="logoutBtn" class="btn btn-secondary btn-small">로그아웃</button>
+                        </div>
+                    </div>
                     <button id="themeToggle" class="btn btn-secondary btn-small">🌙</button>
                 </div>
             </div>

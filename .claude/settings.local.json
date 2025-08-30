@@ -4,7 +4,11 @@
       "Bash(mkdir:*)",
       "Bash(git init:*)",
       "Bash(git remote add origin https://github.com/Lrinvl1203/photo2blog_v2)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git push:*)",
+      "Bash(git commit:*)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__get-library-docs"
     ],
     "deny": [],
     "ask": []

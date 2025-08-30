@@ -1,0 +1,157 @@
+<!-- Supabase Authentication Modal -->
+<!-- PhotoToBlog v3 구독 프로젝트 -->
+
+<div id="authModal" class="auth-modal">
+    <div class="auth-modal-content">
+        <form id="authForm" class="auth-form" novalidate>
+            <h2 id="authTitle">로그인</h2>
+            
+            <!-- Error Message -->
+            <div id="authError" class="auth-error" style="display: none;"></div>
+            
+            <!-- Email Input -->
+            <div class="form-group">
+                <label for="authEmail">이메일 주소</label>
+                <input 
+                    type="email" 
+                    id="authEmail" 
+                    class="input" 
+                    required 
+                    placeholder="your@email.com"
+                    autocomplete="email"
+                >
+            </div>
+            
+            <!-- Password Input -->
+            <div class="form-group">
+                <label for="authPassword">비밀번호</label>
+                <input 
+                    type="password" 
+                    id="authPassword" 
+                    class="input" 
+                    required 
+                    placeholder="비밀번호를 입력하세요"
+                    autocomplete="current-password"
+                    minlength="6"
+                >
+            </div>
+            
+            <!-- Submit Button -->
+            <button type="submit" id="authSubmit" class="btn btn-primary">
+                로그인
+            </button>
+            
+            <!-- Mode Toggle -->
+            <div style="text-align: center; margin-top: 1rem;">
+                <p style="color: var(--text-secondary); font-size: 0.9rem;">
+                    계정이 없으신가요? 
+                    <a href="#" id="toggleAuthMode" style="color: var(--primary-color); text-decoration: none;">회원가입</a>
+                </p>
+            </div>
+            
+            <!-- Close Button -->
+            <button type="button" id="closeAuthModal" class="btn btn-secondary" style="margin-top: 1rem;">
+                취소
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Additional Info Section (Optional) -->
+<div id="authInfo" style="display: none;">
+    <div style="margin-top: 1rem; padding: 1rem; background: var(--surface); border-radius: 8px; border: 1px solid var(--border);">
+        <h4 style="color: var(--text-primary); margin-bottom: 0.5rem; font-size: 0.9rem;">
+            🎯 서비스 이용 안내
+        </h4>
+        <ul style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5; padding-left: 1rem;">
+            <li>무료 사용자: 기본 AI 블로그 생성 기능</li>
+            <li>프리미엄 사용자: 고급 편집, 다양한 템플릿, 우선 처리</li>
+            <li>모든 계정은 안전하게 암호화되어 보호됩니다</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+// 모달 HTML이 로드되면 인증 시스템 연결
+document.addEventListener('DOMContentLoaded', function() {
+    // 추가 정보 토글 기능
+    const toggleInfo = document.createElement('button');
+    toggleInfo.textContent = '서비스 안내';
+    toggleInfo.className = 'btn btn-secondary btn-small';
+    toggleInfo.style.cssText = 'margin-top: 0.5rem; font-size: 0.8rem;';
+    
+    const authForm = document.getElementById('authForm');
+    if (authForm) {
+        authForm.appendChild(toggleInfo);
+        
+        toggleInfo.addEventListener('click', (e) => {
+            e.preventDefault();
+            const authInfo = document.getElementById('authInfo');
+            if (authInfo) {
+                authInfo.style.display = authInfo.style.display === 'none' ? 'block' : 'none';
+            }
+        });
+    }
+
+    // ESC 키로 모달 닫기
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const authModal = document.getElementById('authModal');
+            if (authModal && authModal.classList.contains('show')) {
+                if (window.authManager) {
+                    window.authManager.hideAuthModal();
+                }
+            }
+        }
+    });
+
+    // 폼 유효성 검사 개선
+    const authEmailInput = document.getElementById('authEmail');
+    const authPasswordInput = document.getElementById('authPassword');
+    
+    if (authEmailInput) {
+        authEmailInput.addEventListener('blur', validateEmail);
+        authEmailInput.addEventListener('input', clearEmailError);
+    }
+    
+    if (authPasswordInput) {
+        authPasswordInput.addEventListener('blur', validatePassword);
+        authPasswordInput.addEventListener('input', clearPasswordError);
+    }
+
+    function validateEmail() {
+        const email = authEmailInput.value.trim();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        
+        if (email && !emailRegex.test(email)) {
+            authEmailInput.setCustomValidity('유효한 이메일 주소를 입력해주세요.');
+            authEmailInput.style.borderColor = 'var(--error-color)';
+        } else {
+            authEmailInput.setCustomValidity('');
+            authEmailInput.style.borderColor = '';
+        }
+    }
+
+    function validatePassword() {
+        const password = authPasswordInput.value;
+        
+        if (password && password.length < 6) {
+            authPasswordInput.setCustomValidity('비밀번호는 최소 6자 이상이어야 합니다.');
+            authPasswordInput.style.borderColor = 'var(--error-color)';
+        } else {
+            authPasswordInput.setCustomValidity('');
+            authPasswordInput.style.borderColor = '';
+        }
+    }
+
+    function clearEmailError() {
+        authEmailInput.style.borderColor = '';
+        authEmailInput.setCustomValidity('');
+    }
+
+    function clearPasswordError() {
+        authPasswordInput.style.borderColor = '';
+        authPasswordInput.setCustomValidity('');
+    }
+});
+</script>
