@@ -8,7 +8,19 @@ const SUPABASE_CONFIG = {
 };
 
 // Supabase client 초기화
-const supabaseClient = supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+let supabaseClient;
+
+// Supabase가 로드되었는지 확인하고 클라이언트 초기화
+function initializeSupabase() {
+    if (typeof supabase !== 'undefined' && supabase.createClient) {
+        supabaseClient = supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+        console.log('Supabase client initialized');
+        return true;
+    } else {
+        console.error('Supabase SDK not loaded');
+        return false;
+    }
+}
 
 // 전역 인증 상태
 let authState = {
@@ -345,7 +357,24 @@ if (document.readyState === 'loading') {
 }
 
 function initializeAuthSystem() {
-    authManager = new AuthenticationManager();
+    // Supabase 먼저 초기화
+    if (initializeSupabase()) {
+        authManager = new AuthenticationManager();
+    } else {
+        console.error('Cannot initialize auth system: Supabase not available');
+        // Supabase 없이도 기본 UI는 동작하도록
+        showSupabaseSetupMessage();
+    }
+}
+
+// Supabase 설정 안내 메시지 표시
+function showSupabaseSetupMessage() {
+    const loginBtn = document.getElementById('loginBtn');
+    if (loginBtn) {
+        loginBtn.addEventListener('click', () => {
+            alert('Supabase 설정이 필요합니다.\n\n1. SUPABASE_SETUP.md 파일을 참고하여 Supabase 프로젝트를 설정하세요.\n2. auth.js 파일에서 YOUR_SUPABASE_ANON_KEY를 실제 키로 변경하세요.');
+        });
+    }
 }
 
 // 전역 유틸리티 함수들
