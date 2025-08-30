@@ -4,7 +4,7 @@
 // Supabase 설정 - 실제 값으로 변경 필요
 const SUPABASE_CONFIG = {
     url: 'https://qdkniwlsxaxkvdvwxrha.supabase.co',
-    anonKey: 'YOUR_SUPABASE_ANON_KEY' // 실제 anon key로 변경 필요
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFka25pd2xzeGF4a3Zkdnd4cmhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1MjY1MTAsImV4cCI6MjA3MjEwMjUxMH0.SclIGxOmEOornxSm2c4zuoq_gkmWUHl1dGkWdl3Y7Mw'
 };
 
 // Supabase client 초기화
@@ -406,3 +406,47 @@ window.authUtils = {
         return true;
     }
 };
+
+// 인증 상태 테스트 함수
+window.authTest = {
+    getAuthState: () => {
+        console.log('현재 인증 상태:', authState);
+        return authState;
+    },
+    
+    checkSupabaseConnection: async () => {
+        try {
+            const { data, error } = await supabaseClient.auth.getSession();
+            console.log('Supabase 연결 상태:', error ? 'Failed' : 'Connected');
+            if (error) console.error('Connection error:', error);
+            return !error;
+        } catch (err) {
+            console.error('Connection test failed:', err);
+            return false;
+        }
+    },
+    
+    testSignUp: async (email = 'test@example.com', password = 'testpass123') => {
+        console.log('테스트 회원가입 시도...');
+        try {
+            const { data, error } = await supabaseClient.auth.signUp({
+                email: email,
+                password: password,
+                options: {
+                    data: { premium: false }
+                }
+            });
+            console.log('회원가입 결과:', { data, error });
+            return { success: !error, data, error };
+        } catch (err) {
+            console.error('회원가입 테스트 실패:', err);
+            return { success: false, error: err };
+        }
+    }
+};
+
+console.log('🔐 Real Supabase Authentication Enabled');
+console.log('테스트 방법:');
+console.log('1. authTest.checkSupabaseConnection() - Supabase 연결 확인');
+console.log('2. authTest.getAuthState() - 현재 인증 상태 확인');
+console.log('3. UI에서 회원가입/로그인 테스트');

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>결제 성공 - PhotoToBlog v3</title>
+    
+    <!-- Supabase JavaScript SDK -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --success-color: #059669;
+            --background: #ffffff;
+            --surface: #f8fafc;
+            --border: #e2e8f0;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--success-color), #10b981);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .success-container {
+            background: var(--background);
+            border-radius: 20px;
+            padding: 3rem;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            max-width: 500px;
+            width: 100%;
+            animation: slideUp 0.6s ease;
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            animation: bounce 1s ease infinite alternate;
+        }
+
+        .success-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .success-message {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .success-details {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border: 1px solid var(--border);
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .detail-value {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .loading {
+            opacity: 0.7;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-10px); }
+        }
+
+        @media (max-width: 480px) {
+            .success-container {
+                padding: 2rem;
+            }
+            
+            .success-title {
+                font-size: 1.5rem;
+            }
+            
+            .success-message {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="success-container">
+        <div class="success-icon">🎉</div>
+        <h1 class="success-title">결제가 완료되었습니다!</h1>
+        <p class="success-message">
+            PhotoToBlog v3 프리미엄 구독이 성공적으로 시작되었습니다.<br>
+            이제 모든 프리미엄 기능을 자유롭게 이용하실 수 있습니다.
+        </p>
+        
+        <div id="paymentDetails" class="success-details loading">
+            <div class="detail-row">
+                <span class="detail-label">주문번호</span>
+                <span id="orderIdDisplay" class="detail-value">로딩 중...</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">구독 플랜</span>
+                <span id="planNameDisplay" class="detail-value">로딩 중...</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">결제 금액</span>
+                <span id="amountDisplay" class="detail-value">로딩 중...</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">다음 결제일</span>
+                <span id="nextPaymentDisplay" class="detail-value">로딩 중...</span>
+            </div>
+        </div>
+        
+        <a href="/" class="btn btn-primary">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9,22 9,12 15,12 15,22"></polyline>
+            </svg>
+            홈으로 돌아가기
+        </a>
+    </div>
+
+    <script>
+        // URL 파라미터에서 결제 정보 추출
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = urlParams.get('orderId');
+        const paymentKey = urlParams.get('paymentKey');
+        const amount = urlParams.get('amount');
+
+        // 결제 정보 표시
+        function displayPaymentInfo() {
+            if (orderId) {
+                document.getElementById('orderIdDisplay').textContent = orderId;
+            }
+            
+            if (amount) {
+                document.getElementById('amountDisplay').textContent = `₩${parseInt(amount).toLocaleString()}`;
+            }
+            
+            // 다음 결제일 계산 (30일 후)
+            const nextPayment = new Date();
+            nextPayment.setDate(nextPayment.getDate() + 30);
+            document.getElementById('nextPaymentDisplay').textContent = nextPayment.toLocaleDateString('ko-KR');
+            
+            // 플랜명은 localStorage나 URL 파라미터에서 가져오기
+            const planName = localStorage.getItem('selectedPlanName') || '프리미엄';
+            document.getElementById('planNameDisplay').textContent = planName;
+            
+            // 로딩 상태 제거
+            document.getElementById('paymentDetails').classList.remove('loading');
+        }
+
+        // 페이지 로드 시 실행
+        window.addEventListener('DOMContentLoaded', () => {
+            displayPaymentInfo();
+            
+            // 결제 성공 처리 (향후 백엔드 연동 시 사용)
+            if (orderId && paymentKey) {
+                console.log('Payment successful:', { orderId, paymentKey, amount });
+                
+                // TODO: 백엔드 API 호출하여 구독 상태 업데이트
+                // updateSubscriptionStatus(orderId, paymentKey);
+            }
+        });
+    </script>
+</body>
+</html>

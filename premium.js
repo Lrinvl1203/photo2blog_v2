@@ -1,41 +1,27 @@
 // Premium Features Management System
 // PhotoToBlog v3 구독 프로젝트
 
-// 프리미엄 기능 정의
+// 프리미엄 기능 정의 - 단순화된 Free/Pro 구조
 const PREMIUM_FEATURES = {
-    // 고급 편집 기능
-    ADVANCED_EDITING: 'advanced_editing',
-    // 다양한 템플릿
-    PREMIUM_TEMPLATES: 'premium_templates', 
-    // 우선 처리
-    PRIORITY_PROCESSING: 'priority_processing',
-    // 무제한 생성
-    UNLIMITED_GENERATION: 'unlimited_generation',
-    // 고급 AI 모델
-    ADVANCED_AI_MODELS: 'advanced_ai_models',
-    // 이미지 고급 처리
-    ADVANCED_IMAGE_PROCESSING: 'advanced_image_processing',
-    // 다국어 생성
-    MULTILINGUAL_GENERATION: 'multilingual_generation',
-    // SEO 최적화
-    SEO_OPTIMIZATION: 'seo_optimization',
-    // 커스텀 브랜딩
-    CUSTOM_BRANDING: 'custom_branding',
-    // API 접근
-    API_ACCESS: 'api_access'
+    // Pro 전용 기능들
+    CONTENT_EDIT: 'content_edit',           // 콘텐츠 추가/수정
+    TONE_ADJUSTMENT: 'tone_adjustment',     // 톤 조절
+    OTHER_POST_CREATION: 'other_post_creation', // 다른 블로그 포스트 만들기
+    POST_ENHANCEMENT: 'post_enhancement',   // 포스팅 강화
+    IMAGE_EDITING: 'image_editing'          // 이미지 수정
 };
 
-// 사용량 제한
+// 사용량 제한 - 단순화된 Free/Pro 구조
 const USAGE_LIMITS = {
     FREE: {
-        monthly_posts: 10,
-        images_per_post: 3,
-        ai_requests_per_day: 20
+        // Free 플랜: 기본 생성 기능만 제공
+        basicFeatures: true,
+        advancedFeatures: false
     },
-    PREMIUM: {
-        monthly_posts: -1, // 무제한
-        images_per_post: 10,
-        ai_requests_per_day: -1 // 무제한
+    PRO: {
+        // Pro 플랜: 모든 기능 제공
+        basicFeatures: true,
+        advancedFeatures: true
     }
 };
 
@@ -47,6 +33,7 @@ class PremiumManager {
             daily_requests: 0,
             current_month: new Date().getMonth()
         };
+        this.subscription = null;
         this.initializePremiumFeatures();
     }
 
@@ -96,7 +83,7 @@ class PremiumManager {
 
     // 사용자 티어 업데이트
     updateUserTier(isPremium) {
-        this.userTier = isPremium ? 'PREMIUM' : 'FREE';
+        this.userTier = isPremium ? 'PRO' : 'FREE';
         this.updatePremiumUI();
     }
 
@@ -180,7 +167,7 @@ class PremiumManager {
         const premiumElements = document.querySelectorAll('.premium-only');
         const freeElements = document.querySelectorAll('.free-only');
 
-        if (this.userTier === 'PREMIUM') {
+        if (this.userTier === 'PRO') {
             premiumElements.forEach(el => el.style.display = 'block');
             freeElements.forEach(el => el.style.display = 'none');
         } else {
@@ -255,8 +242,8 @@ class PremiumManager {
         const priorityElements = document.querySelectorAll('.priority-feature');
         priorityElements.forEach(element => {
             element.addEventListener('click', (e) => {
-                if (this.userTier === 'PREMIUM') {
-                    // 프리미엄 사용자는 우선 처리 큐에 추가
+                if (this.userTier === 'PRO') {
+                    // Pro 사용자는 우선 처리 큐에 추가
                     this.addToPriorityQueue(e.target);
                 }
             });
@@ -265,18 +252,18 @@ class PremiumManager {
 
     // 기능 접근 권한 확인
     checkFeatureAccess(featureKey) {
-        if (this.userTier === 'PREMIUM') return true;
+        if (this.userTier === 'PRO') return true;
         
-        // 무료 사용자는 프리미엄 기능 접근 불가
-        const premiumOnlyFeatures = [
-            PREMIUM_FEATURES.ADVANCED_EDITING,
-            PREMIUM_FEATURES.PREMIUM_TEMPLATES,
-            PREMIUM_FEATURES.PRIORITY_PROCESSING,
-            PREMIUM_FEATURES.ADVANCED_AI_MODELS,
-            PREMIUM_FEATURES.ADVANCED_IMAGE_PROCESSING
+        // 무료 사용자는 Pro 전용 기능 접근 불가
+        const proOnlyFeatures = [
+            PREMIUM_FEATURES.CONTENT_EDIT,
+            PREMIUM_FEATURES.TONE_ADJUSTMENT,
+            PREMIUM_FEATURES.OTHER_POST_CREATION,
+            PREMIUM_FEATURES.POST_ENHANCEMENT,
+            PREMIUM_FEATURES.IMAGE_EDITING
         ];
         
-        return !premiumOnlyFeatures.includes(featureKey);
+        return !proOnlyFeatures.includes(featureKey);
     }
 
     // 사용량 제한 확인
@@ -409,28 +396,93 @@ class PremiumManager {
 
     // 업그레이드 처리
     async handleUpgrade() {
-        // 실제 결제 시스템 연동 필요
-        alert('결제 시스템 연동 예정입니다. 곧 서비스 예정!');
-        
-        // 임시로 프리미엄으로 전환 (테스트용)
-        if (confirm('테스트를 위해 프리미엄으로 전환하시겠습니까?')) {
-            this.userTier = 'PREMIUM';
-            
-            // Supabase 사용자 메타데이터 업데이트
-            if (window.authUtils?.isAuthenticated()) {
-                try {
-                    const user = window.authUtils.getCurrentUser();
-                    await supabaseClient.auth.updateUser({
-                        data: { premium: true }
-                    });
-                } catch (error) {
-                    console.error('Failed to update premium status:', error);
-                }
+        // Toss Payments 구독 시스템 연동
+        if (window.tossPaymentUtils) {
+            // 구독 모달 열기
+            window.tossPaymentUtils.openPaymentModal('premium');
+        } else {
+            // 백업: 구독 모달 직접 열기
+            if (typeof openSubscriptionModal === 'function') {
+                openSubscriptionModal();
+            } else {
+                alert('결제 시스템을 초기화하고 있습니다. 잠시 후 다시 시도해주세요.');
             }
-            
-            this.updatePremiumUI();
-            alert('프리미엄 기능이 활성화되었습니다!');
         }
+    }
+    
+    // 구독 상태 업데이트 (Toss Payments 연동 후 호출됨)
+    async updateSubscriptionStatus(subscription) {
+        try {
+            this.subscription = subscription;
+            
+            if (subscription && subscription.status === 'active') {
+                this.userTier = this.getPlanTier(subscription.plan_id);
+                
+                // UI 업데이트
+                this.updatePremiumUI();
+                
+                // 성공 알림
+                this.showSubscriptionSuccessNotification(subscription.plan_name);
+            } else {
+                this.userTier = 'FREE';
+                this.updatePremiumUI();
+            }
+        } catch (error) {
+            console.error('Failed to update subscription status:', error);
+        }
+    }
+    
+    // 플랜 ID를 티어로 변환
+    getPlanTier(planId) {
+        const planTierMap = {
+            'photoblog_pro_daily': 'PRO',
+            'photoblog_pro_weekly': 'PRO',
+            'photoblog_pro_monthly': 'PRO',
+            'photoblog_pro_quarterly': 'PRO',
+            'photoblog_pro_yearly': 'PRO'
+        };
+        return planTierMap[planId] || 'FREE';
+    }
+    
+    // 구독 성공 알림 표시
+    showSubscriptionSuccessNotification(planName) {
+        const notification = this.createNotification(
+            'success',
+            `🎉 ${planName} 구독이 시작되었습니다!`,
+            '이제 모든 프리미엄 기능을 이용하실 수 있습니다.'
+        );
+        
+        // 3초 후 자동 닫기
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 3000);
+    }
+    
+    // 알림 생성
+    createNotification(type, title, message) {
+        const notification = document.createElement('div');
+        notification.className = `payment-notification ${type} show`;
+        
+        notification.innerHTML = `
+            <div class="payment-notification-content">
+                <div class="payment-notification-message">
+                    <strong>${title}</strong><br>
+                    ${message}
+                </div>
+                <button class="payment-notification-close">&times;</button>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // 닫기 버튼 이벤트
+        notification.querySelector('.payment-notification-close').addEventListener('click', () => {
+            notification.remove();
+        });
+        
+        return notification;
     }
 
     // 우선 처리 큐에 추가
@@ -461,10 +513,64 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+// 인증 상태 감지 및 프리미엄 상태 업데이트
+function syncWithAuth() {
+    if (window.authUtils && premiumManager) {
+        const user = window.authUtils.getCurrentUser();
+        if (user) {
+            const isPremium = user.user_metadata?.premium === true || user.app_metadata?.premium === true;
+            premiumManager.updateUserTier(isPremium);
+            console.log(`프리미엄 상태 동기화: ${isPremium ? 'PRO' : 'FREE'}`);
+        } else {
+            premiumManager.updateUserTier(false);
+            console.log('프리미엄 상태 동기화: 로그아웃');
+        }
+    }
+}
+
+// 주기적으로 인증 상태 확인
+setInterval(() => {
+    syncWithAuth();
+}, 5000); // 5초마다 확인
+
+// 프리미엄 상태 테스트 함수
+window.premiumTest = {
+    checkPremiumStatus: () => {
+        if (premiumManager) {
+            console.log('현재 프리미엄 상태:', premiumManager.userTier);
+            console.log('구독 정보:', premiumManager.subscription);
+            return premiumManager.userTier;
+        }
+        return null;
+    },
+    
+    testPremiumFeature: (featureName) => {
+        if (premiumManager) {
+            const hasFeature = premiumManager.checkFeatureAccess(featureName);
+            console.log(`${featureName} 기능 접근:`, hasFeature ? '허용' : '거부');
+            return hasFeature;
+        }
+        return false;
+    },
+    
+    syncWithAuth: syncWithAuth,
+    
+    simulatePremiumUpgrade: () => {
+        if (premiumManager) {
+            premiumManager.updateUserTier(true);
+            console.log('프리미엄 상태로 변경됨 (테스트용)');
+        }
+    }
+};
+
 // 전역 프리미엄 유틸리티
 window.premiumUtils = {
     checkFeature: (featureKey) => premiumManager?.checkFeatureAccess(featureKey),
     incrementUsage: (type) => premiumManager?.incrementUsage(type),
     showUpgrade: () => premiumManager?.showUpgradeModal(),
-    isPremium: () => premiumManager?.userTier === 'PREMIUM'
+    isPremium: () => premiumManager?.userTier === 'PREMIUM',
+    isPro: () => premiumManager?.userTier === 'PRO',
+    getUserTier: () => premiumManager?.userTier,
+    getSubscription: () => premiumManager?.subscription,
+    updateSubscription: (subscription) => premiumManager?.updateSubscriptionStatus(subscription)
 };
