@@ -1,0 +1,5 @@
+{
+  "name": "나노 바나나 이미지 생성기",
+  "description": "텍스트 프롬프트를 사용하여 이미지를 생성하고 편집하는 AI 기반 애플리케이션입니다. Gemini API를 사용하여 아이디어를 시각적 현실로 만드세요.",
+  "requestFramePermissions": []
+}
