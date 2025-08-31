@@ -1014,6 +1014,87 @@
             margin-top: 1rem;
         }
 
+        .image-edit-result-area {
+            display: none;
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+
+        .image-edit-result {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            margin-bottom: 1rem;
+        }
+
+        .image-edit-result-prompt {
+            background: var(--surface-secondary);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            color: var(--text-secondary);
+            font-style: italic;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .image-edit-result-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .result-btn {
+            padding: 0.75rem 1rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .result-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .result-btn-download {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        .result-btn-share {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+        }
+
+        .result-btn-accept {
+            background: linear-gradient(135deg, #FF9800, #F57C00);
+            color: white;
+        }
+
+        .result-btn-retry {
+            background: linear-gradient(135deg, #9E9E9E, #757575);
+            color: white;
+        }
+
+        .result-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result-btn:disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
         .loading-overlay {
             position: absolute;
             top: 0;
@@ -1063,6 +1144,16 @@
             .image-editor-actions {
                 flex-direction: column;
             }
+
+            .image-edit-result-actions {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+
+            .result-btn {
+                padding: 1rem;
+                font-size: 1rem;
+            }
         }
     </style>
 </head>
@@ -1103,11 +1194,11 @@
                     </select>
                     <button id="apiSetupBtn" class="btn btn-secondary btn-small" data-i18n="api_setup_button">🔑 API</button>
                     <div id="authContainer">
-                        <button id="subscribeBtn" class="btn btn-success btn-small" onclick="openSubscriptionModal()">💎 구독</button>
                         <button id="loginBtn" class="btn btn-primary btn-small">🔐 로그인</button>
                         <div id="userProfile" class="user-profile" style="display: none;">
                             <div class="user-avatar">👤</div>
                             <span id="userEmail" class="user-email"></span>
+                            <button id="myPageBtn" class="btn btn-success btn-small">📊 마이페이지</button>
                             <button id="logoutBtn" class="btn btn-secondary btn-small">로그아웃</button>
                         </div>
                     </div>
@@ -1177,17 +1268,17 @@
                     <div class="flex justify-between items-center mb-2">
                         <h2 data-i18n="output_title">생성된 블로그 포스트</h2>
                         <div class="flex gap-1">
-                            <button id="addContentBtn" class="btn btn-secondary btn-small">
-                                <span data-i18n="output_add_modify_button">콘텐츠 추가/수정</span>
+                            <button id="addContentBtn" class="btn btn-secondary btn-small pro-feature">
+                                💎 <span data-i18n="output_add_modify_button">콘텐츠 추가/수정</span>
                             </button>
-                            <button id="adjustToneBtn" class="btn btn-secondary btn-small">
-                                <span data-i18n="output_adjust_tone_button">톤 조절</span>
+                            <button id="adjustToneBtn" class="btn btn-secondary btn-small pro-feature">
+                                💎 <span data-i18n="output_adjust_tone_button">톤 조절</span>
+                            </button>
+                            <button id="enhancePostBtn" class="btn btn-secondary btn-small pro-feature">
+                                💎 <span data-i18n="output_enhance_button">포스팅 강화</span>
                             </button>
                             <button id="createAnotherBtn" class="btn btn-secondary btn-small">
                                 <span data-i18n="output_create_another_button">다른 블로그 포스트 만들기</span>
-                            </button>
-                            <button id="enhancePostBtn" class="btn btn-secondary btn-small">
-                                ⚡ <span data-i18n="output_enhance_button">포스팅 강화</span>
                             </button>
                         </div>
                     </div>
@@ -2184,6 +2275,11 @@ ${photoDescriptions}`;
                 showBlogOutput(result, validPhotos);
                 showLoading(false);
                 
+                // 사용량 업데이트
+                if (window.myPageUtils) {
+                    window.myPageUtils.updateUsageCount('post');
+                }
+                
             } catch (error) {
                 console.error('Blog generation failed:', error);
                 showError(t('error_generation_failed'));
@@ -2460,7 +2556,7 @@ ${photoDescriptions}`;
 
         async function addContentToBlog() {
             // 프리미엄 기능 체크
-            if (window.premiumUtils && !window.premiumUtils.checkFeature('advanced_editing')) {
+            if (window.premiumUtils && !window.premiumUtils.checkFeature('content_edit')) {
                 window.premiumUtils.showUpgrade();
                 return;
             }
@@ -2624,7 +2720,7 @@ Based on the guidelines and information above, please regenerate a complete blog
 
         async function adjustTone() {
             // 프리미엄 기능 체크
-            if (window.premiumUtils && !window.premiumUtils.checkFeature('advanced_editing')) {
+            if (window.premiumUtils && !window.premiumUtils.checkFeature('content_edit')) {
                 window.premiumUtils.showUpgrade();
                 return;
             }
@@ -2788,6 +2884,12 @@ Based on the guidelines and new tone requirements above, please rewrite the blog
 
         // 포스팅 강화 기능들
         function openEnhanceModal() {
+            // 프리미엄 기능 체크
+            if (window.premiumUtils && !window.premiumUtils.checkFeature('post_enhancement')) {
+                window.premiumUtils.showUpgrade();
+                return;
+            }
+
             if (!currentState.generatedBlog) {
                 alert(t('enhance_no_content_error'));
                 return;
@@ -3467,9 +3569,18 @@ ${gaps.recommendations.join('\n')}
             currentState.editingImageIndex = null;
             currentState.isImageEditing = false;
             
-            // 로딩 상태 숨기기
+            // 편집 결과 초기화
+            currentEditedImageResult = null;
+            
+            // UI 초기화
             document.getElementById('imageEditingLoader').style.display = 'none';
+            document.getElementById('imageEditResultArea').style.display = 'none';
+            document.getElementById('imageEditControls').style.display = 'block';
+            document.getElementById('imageEditPrompt').value = '';
         }
+
+        // 이미지 편집 결과를 저장할 변수
+        let currentEditedImageResult = null;
 
         async function confirmImageEdit() {
             const prompt = document.getElementById('imageEditPrompt').value.trim();
@@ -3511,6 +3622,9 @@ ${gaps.recommendations.join('\n')}
                 currentState.isImageEditing = true;
                 document.getElementById('imageEditingLoader').style.display = 'flex';
                 
+                // 편집 컨트롤 숨기기
+                document.getElementById('imageEditControls').style.display = 'none';
+                
                 const originalPhoto = currentState.photos[currentState.editingImageIndex];
                 
                 // 사용량 추적 업데이트
@@ -3524,31 +3638,160 @@ ${gaps.recommendations.join('\n')}
                 
                 const newBase64 = await editBlogPostImage(originalPhoto, prompt);
                 
-                // 이미지 업데이트
-                currentState.photos[currentState.editingImageIndex].base64 = newBase64;
+                // 편집된 이미지 결과 저장
+                currentEditedImageResult = {
+                    originalBase64: originalPhoto.base64,
+                    editedBase64: newBase64,
+                    prompt: prompt,
+                    index: currentState.editingImageIndex
+                };
                 
-                // 모달 닫기
-                closeImageEditor();
-                
-                // 성공 알림
-                showNotification('이미지가 성공적으로 수정되었습니다!', 'success');
-                
-                // API 상태 업데이트 (사용량 표시 갱신)
-                updateApiStatus(currentState.apiKey);
-                
-                // 블로그 재표시 (이미지가 업데이트됨)
-                if (currentState.generatedBlog) {
-                    showBlogOutput(currentState.generatedBlog);
-                }
+                // 결과 표시
+                showImageEditResult(newBase64, prompt);
                 
             } catch (error) {
                 console.error('Image editing error:', error);
                 showNotification(error.message || '이미지 수정 중 오류가 발생했습니다.', 'error');
+                
+                // 오류 시 편집 컨트롤 다시 표시
+                document.getElementById('imageEditControls').style.display = 'block';
             } finally {
                 // 로딩 종료
                 currentState.isImageEditing = false;
                 document.getElementById('imageEditingLoader').style.display = 'none';
             }
+        }
+
+        // 이미지 편집 결과 표시
+        function showImageEditResult(editedBase64, prompt) {
+            // 결과 이미지 표시
+            const resultImage = document.getElementById('imageEditResult');
+            resultImage.src = editedBase64;
+            resultImage.style.display = 'block';
+            
+            // 프롬프트 표시
+            const resultPrompt = document.getElementById('imageEditResultPrompt');
+            resultPrompt.textContent = prompt;
+            
+            // 결과 영역 표시
+            document.getElementById('imageEditResultArea').style.display = 'block';
+            
+            // 로딩 숨기기
+            document.getElementById('imageEditingLoader').style.display = 'none';
+        }
+
+        // 편집된 이미지 다운로드
+        function downloadEditedImage() {
+            if (!currentEditedImageResult) {
+                showNotification('다운로드할 이미지가 없습니다.', 'error');
+                return;
+            }
+
+            try {
+                const link = document.createElement('a');
+                link.href = currentEditedImageResult.editedBase64;
+                link.download = `edited-image-${Date.now()}.png`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                showNotification('이미지가 다운로드되었습니다.', 'success');
+            } catch (error) {
+                console.error('Download error:', error);
+                showNotification('다운로드 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        // 편집된 이미지 공유
+        async function shareEditedImage() {
+            if (!currentEditedImageResult) {
+                showNotification('공유할 이미지가 없습니다.', 'error');
+                return;
+            }
+
+            try {
+                // base64를 blob으로 변환
+                const response = await fetch(currentEditedImageResult.editedBase64);
+                const blob = await response.blob();
+                const file = new File([blob], `edited-image-${Date.now()}.png`, { type: 'image/png' });
+                
+                // Web Share API 지원 확인
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        title: '수정된 이미지',
+                        text: `수정 내용: ${currentEditedImageResult.prompt}`,
+                        files: [file],
+                    });
+                    showNotification('이미지가 공유되었습니다.', 'success');
+                } else {
+                    // Web Share API가 지원되지 않는 경우 다운로드로 대체
+                    downloadEditedImage();
+                    showNotification('공유 기능이 지원되지 않아 다운로드로 대체되었습니다.', 'info');
+                }
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    // 사용자가 공유를 취소한 경우
+                    return;
+                }
+                console.error('Share error:', error);
+                showNotification('공유 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        // 편집 결과 수락 및 적용
+        function acceptEditedImage() {
+            if (!currentEditedImageResult) {
+                showNotification('적용할 편집 결과가 없습니다.', 'error');
+                return;
+            }
+
+            try {
+                // 원본 이미지를 편집된 이미지로 교체
+                currentState.photos[currentEditedImageResult.index].base64 = currentEditedImageResult.editedBase64;
+                
+                // 편집 결과 초기화
+                currentEditedImageResult = null;
+                
+                // 모달 닫기
+                closeImageEditor();
+                
+                // 성공 알림
+                showNotification('이미지 편집이 적용되었습니다!', 'success');
+                
+                // API 상태 업데이트
+                updateApiStatus(currentState.apiKey);
+                
+                // 블로그 재표시
+                if (currentState.generatedBlog) {
+                    showBlogOutput(currentState.generatedBlog);
+                }
+                
+            } catch (error) {
+                console.error('Accept edit error:', error);
+                showNotification('편집 결과 적용 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        // 편집 다시 시도
+        function retryImageEdit() {
+            if (!currentEditedImageResult) {
+                // 편집 결과가 없는 경우 편집 컨트롤로 돌아가기
+                document.getElementById('imageEditResultArea').style.display = 'none';
+                document.getElementById('imageEditControls').style.display = 'block';
+                return;
+            }
+
+            // 편집 결과 초기화
+            currentEditedImageResult = null;
+            
+            // 결과 영역 숨기기
+            document.getElementById('imageEditResultArea').style.display = 'none';
+            
+            // 편집 컨트롤 다시 표시
+            document.getElementById('imageEditControls').style.display = 'block';
+            
+            // 프롬프트 입력 포커스
+            document.getElementById('imageEditPrompt').focus();
         }
 
         async function editBlogPostImage(originalPhoto, prompt) {
@@ -4285,9 +4528,39 @@ ${gaps.recommendations.join('\n')}
                             <button type="button" class="btn btn-secondary" onclick="closeImageEditor()">
                                 취소
                             </button>
-                            <button type="button" id="applyImageEditBtn" class="btn btn-primary" onclick="applyImageEdit()">
+                            <button type="button" id="applyImageEditBtn" class="btn btn-primary" onclick="confirmImageEdit()">
                                 수정 적용
                             </button>
+                        </div>
+                        
+                        <!-- Result Actions (hidden by default) -->
+                        <div class="editor-result-actions" id="editorResultActions" style="display: none;">
+                            <div class="result-actions-grid">
+                                <button type="button" class="btn btn-outline" onclick="downloadEditedImage()">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="btn-icon" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                    </svg>
+                                    다운로드
+                                </button>
+                                <button type="button" class="btn btn-outline" onclick="shareEditedImage()">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="btn-icon" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
+                                    </svg>
+                                    공유
+                                </button>
+                                <button type="button" class="btn btn-primary" onclick="acceptEditedImage()">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="btn-icon" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                    </svg>
+                                    적용하기
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="retryImageEdit()">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="btn-icon" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 110 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.885-.666A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566z" clip-rule="evenodd" />
+                                    </svg>
+                                    다시 수정
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -4310,50 +4583,107 @@ ${gaps.recommendations.join('\n')}
                 </div>
                 
                 <div style="padding: 2rem;">
-                    <div class="subscription-plans">
-                        <!-- 베이직 플랜 -->
-                        <div class="plan-card">
-                            <div class="plan-name">베이직</div>
-                            <div class="plan-price">₩9,900</div>
-                            <div class="plan-period">월 구독</div>
-                            <ul class="plan-features">
-                                <li>월 100장 이미지 처리</li>
-                                <li>기본 블로그 생성</li>
-                                <li>이메일 지원</li>
-                                <li>클라우드 스토리지 5GB</li>
+                    <!-- 플랜 비교 헤더 -->
+                    <div class="plan-comparison-header">
+                        <h4>💎 Pro 플랜의 강력한 기능들</h4>
+                        <p>Free 플랜에서는 기본 기능만, Pro 플랜에서는 AI의 모든 힘을 경험하세요!</p>
+                    </div>
+                    
+                    <!-- 플랜 비교표 -->
+                    <div class="plan-comparison-table">
+                        <div class="plan-column free-column">
+                            <div class="plan-header">
+                                <h3>🆓 Free Plan</h3>
+                                <div class="plan-price-big">무료</div>
+                            </div>
+                            <ul class="feature-list">
+                                <li class="included">✅ 기본 블로그 포스트 생성</li>
+                                <li class="included">✅ 결과물 및 미리보기</li>
+                                <li class="included">✅ HTML/마크다운/텍스트 복사</li>
+                                <li class="excluded">❌ 콘텐츠 추가/수정</li>
+                                <li class="excluded">❌ 톤 조절</li>
+                                <li class="excluded">❌ 다른 블로그 포스트 만들기</li>
+                                <li class="excluded">❌ 포스팅 강화</li>
+                                <li class="excluded">❌ 이미지 수정</li>
                             </ul>
-                            <button class="subscribe-btn" onclick="selectPlan('basic')">베이직 시작하기</button>
                         </div>
                         
-                        <!-- 프리미엄 플랜 -->
-                        <div class="plan-card featured">
-                            <div class="plan-name">프리미엄</div>
-                            <div class="plan-price">₩19,900</div>
-                            <div class="plan-period">월 구독</div>
-                            <ul class="plan-features">
-                                <li>월 500장 이미지 처리</li>
-                                <li>고급 AI 블로그 생성</li>
-                                <li>이미지 수정 기능</li>
-                                <li>우선 고객 지원</li>
-                                <li>클라우드 스토리지 50GB</li>
+                        <div class="plan-column pro-column featured">
+                            <div class="plan-header">
+                                <div class="plan-badge">🔥 추천!</div>
+                                <h3>💎 Pro Plan</h3>
+                                <div class="plan-price-section">
+                                    <div class="plan-options">
+                                        <div class="price-option">
+                                            <span class="period">일간</span>
+                                            <span class="price">₩2,000</span>
+                                        </div>
+                                        <div class="price-option">
+                                            <span class="period">주간</span>
+                                            <span class="price">₩3,300</span>
+                                        </div>
+                                        <div class="price-option popular">
+                                            <span class="period">월간</span>
+                                            <span class="price">₩8,900</span>
+                                        </div>
+                                        <div class="price-option discount">
+                                            <span class="period">3개월</span>
+                                            <span class="price">₩21,360</span>
+                                            <span class="discount-badge">20% 할인</span>
+                                        </div>
+                                        <div class="price-option best-value">
+                                            <span class="period">연간</span>
+                                            <span class="price">₩74,760</span>
+                                            <span class="discount-badge">30% 할인</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <ul class="feature-list">
+                                <li class="included">✅ Free Plan 모든 기능</li>
+                                <li class="included premium">💎 콘텐츠 추가/수정</li>
+                                <li class="included premium">💎 톤 조절</li>
+                                <li class="included premium">💎 다른 블로그 포스트 만들기</li>
+                                <li class="included premium">💎 포스팅 강화</li>
+                                <li class="included premium">💎 이미지 수정</li>
+                                <li class="included">✅ 무제한 사용</li>
+                                <li class="included">✅ 우선 처리</li>
                             </ul>
-                            <button class="subscribe-btn" onclick="selectPlan('premium')">프리미엄 시작하기</button>
+                            
+                            <div class="pro-plan-buttons">
+                                <button class="subscribe-btn primary" onclick="selectPlan('pro_daily')">1일 체험 ₩2,000</button>
+                                <button class="subscribe-btn" onclick="selectPlan('pro_weekly')">7일 ₩3,300</button>
+                                <button class="subscribe-btn popular" onclick="selectPlan('pro_monthly')">1개월 ₩8,900</button>
+                                <button class="subscribe-btn discount" onclick="selectPlan('pro_quarterly')">3개월 ₩21,360 <span>20% 할인</span></button>
+                                <button class="subscribe-btn best" onclick="selectPlan('pro_yearly')">연간 ₩74,760 <span>30% 할인</span></button>
+                            </div>
                         </div>
-                        
-                        <!-- 프로 플랜 -->
-                        <div class="plan-card">
-                            <div class="plan-name">프로</div>
-                            <div class="plan-price">₩39,900</div>
-                            <div class="plan-period">월 구독</div>
-                            <ul class="plan-features">
-                                <li>무제한 이미지 처리</li>
-                                <li>AI 이미지 수정 무제한</li>
-                                <li>고급 템플릿 제공</li>
-                                <li>24시간 고객 지원</li>
-                                <li>클라우드 스토리지 200GB</li>
-                                <li>API 접근 권한</li>
-                            </ul>
-                            <button class="subscribe-btn" onclick="selectPlan('pro')">프로 시작하기</button>
+                    </div>
+                    
+                    <!-- Pro 기능 상세 설명 -->
+                    <div class="pro-features-detail">
+                        <h4>💎 Pro 전용 기능 상세</h4>
+                        <div class="feature-details">
+                            <div class="feature-item">
+                                <span class="feature-icon">✏️</span>
+                                <strong>콘텐츠 추가/수정</strong>: 생성된 블로그에 원하는 내용을 추가하거나 기존 내용을 수정
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">🎭</span>
+                                <strong>톤 조절</strong>: 전문적, 친근한, 유머러스한 등 원하는 톤으로 글 스타일 변경
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">📝</span>
+                                <strong>다른 블로그 포스트 만들기</strong>: 동일한 이미지로 다양한 관점의 블로그 포스트 생성
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">⚡</span>
+                                <strong>포스팅 강화</strong>: SEO 최적화, 해시태그 추가, 읽기 쉽게 구조화
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">🎨</span>
+                                <strong>이미지 수정</strong>: AI로 이미지 밝기, 색상, 배경 등을 자연스럽게 수정
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -4411,11 +4741,151 @@ ${gaps.recommendations.join('\n')}
         </div>
     </div>
 
+    <!-- My Page Modal -->
+    <div id="myPageModal" class="modal">
+        <div class="modal-overlay">
+            <div class="modal-content mypage-modal">
+                <div class="modal-header">
+                    <h2>📊 마이페이지</h2>
+                    <button type="button" class="modal-close-btn" onclick="closeMyPageModal()">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="modal-body">
+                    <!-- 탭 네비게이션 -->
+                    <div class="mypage-tabs">
+                        <button class="mypage-tab active" data-tab="profile">🏷️ 프로필</button>
+                        <button class="mypage-tab" data-tab="subscription">💎 구독 관리</button>
+                        <button class="mypage-tab" data-tab="usage">📈 사용량</button>
+                        <button class="mypage-tab" data-tab="history">📋 구매내역</button>
+                    </div>
+                    
+                    <!-- 프로필 탭 -->
+                    <div id="profileTab" class="mypage-tab-content active">
+                        <div class="profile-section">
+                            <div class="profile-card">
+                                <div class="profile-avatar">👤</div>
+                                <div class="profile-info">
+                                    <div class="profile-email" id="profileEmail">user@example.com</div>
+                                    <div class="profile-join-date" id="profileJoinDate">가입일: 2024-01-01</div>
+                                    <div class="profile-tier" id="profileTier">
+                                        <span class="tier-badge free">Free Plan</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 구독 관리 탭 -->
+                    <div id="subscriptionTab" class="mypage-tab-content">
+                        <div class="subscription-section">
+                            <div class="current-plan" id="currentPlanInfo">
+                                <h3>현재 구독 플랜</h3>
+                                <div class="plan-details">
+                                    <div class="plan-name" id="currentPlanName">Free Plan</div>
+                                    <div class="plan-price" id="currentPlanPrice">무료</div>
+                                    <div class="plan-expires" id="currentPlanExpires">만료일: -</div>
+                                </div>
+                            </div>
+                            
+                            <div class="subscription-actions">
+                                <button id="upgradeBtn" class="btn btn-primary">💎 Pro로 업그레이드</button>
+                                <button id="cancelSubscriptionBtn" class="btn btn-secondary" style="display: none;">구독 취소</button>
+                            </div>
+                            
+                            <div class="plan-features">
+                                <h4>이용 가능한 기능</h4>
+                                <div class="feature-comparison">
+                                    <div class="feature-section">
+                                        <h5>Free Plan 기본 기능</h5>
+                                        <ul id="basicFeatures">
+                                            <li>✅ 기본 블로그 포스트 생성</li>
+                                            <li>✅ 결과물 및 미리보기</li>
+                                            <li>✅ HTML/마크다운/텍스트 복사</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="feature-section">
+                                        <h5>Pro Plan 전용 기능</h5>
+                                        <ul id="proFeatures">
+                                            <li id="feature-content-edit">❌ 콘텐츠 추가/수정</li>
+                                            <li id="feature-tone-adjust">❌ 톤 조절</li>
+                                            <li id="feature-other-post">❌ 다른 블로그 포스트 만들기</li>
+                                            <li id="feature-enhance">❌ 포스팅 강화</li>
+                                            <li id="feature-image-edit">❌ 이미지 수정</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 사용량 탭 -->
+                    <div id="usageTab" class="mypage-tab-content">
+                        <div class="usage-section">
+                            <h3>📈 이번 달 사용량</h3>
+                            
+                            <div class="usage-stats">
+                                <div class="usage-item">
+                                    <div class="usage-label">블로그 포스트 생성</div>
+                                    <div class="usage-progress">
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" id="postUsageProgress" style="width: 30%"></div>
+                                        </div>
+                                        <span class="usage-text" id="postUsageText">3 / 10</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="usage-item">
+                                    <div class="usage-label">Premium 기능 사용</div>
+                                    <div class="usage-progress">
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" id="premiumUsageProgress" style="width: 0%"></div>
+                                        </div>
+                                        <span class="usage-text" id="premiumUsageText">0 / ∞</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="usage-item">
+                                    <div class="usage-label">이미지 수정</div>
+                                    <div class="usage-progress">
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" id="imageEditProgress" style="width: 0%"></div>
+                                        </div>
+                                        <span class="usage-text" id="imageEditText">0 / ∞</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 구매내역 탭 -->
+                    <div id="historyTab" class="mypage-tab-content">
+                        <div class="history-section">
+                            <h3>📋 구매내역</h3>
+                            
+                            <div class="history-list" id="purchaseHistory">
+                                <div class="history-empty">
+                                    아직 구매 내역이 없습니다.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Auth CSS -->
     <link rel="stylesheet" href="auth.css">
     <link rel="stylesheet" href="premium.css">
     <link rel="stylesheet" href="image-editor.css">
     <link rel="stylesheet" href="toss-payments.css">
+    <link rel="stylesheet" href="mypage.css">
 
     <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
@@ -4427,5 +4897,6 @@ ${gaps.recommendations.join('\n')}
     <script src="premium.js"></script>
     <script src="image-editor.js"></script>
     <script src="toss-payments.js"></script>
+    <script src="mypage.js"></script>
 </body>
 </html>

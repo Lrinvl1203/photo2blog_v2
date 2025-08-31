@@ -213,11 +213,33 @@ class PremiumManager {
                 return false;
             }
             
+            // Premium 기능 사용량 추적
+            this.trackPremiumUsage(featureKey);
+            
             // 원래 기능 실행
             if (originalClick) {
                 originalClick.call(element, e);
             }
         });
+    }
+
+    // Premium 기능 사용량 추적
+    trackPremiumUsage(featureKey) {
+        try {
+            // 마이페이지 사용량 업데이트
+            if (window.myPageUtils) {
+                window.myPageUtils.updateUsageCount('premium');
+                
+                // 이미지 수정 기능의 경우 별도 추적
+                if (featureKey === PREMIUM_FEATURES.IMAGE_EDITING) {
+                    window.myPageUtils.updateUsageCount('imageEdit');
+                }
+            }
+            
+            console.log(`Premium 기능 사용됨: ${featureKey}`);
+        } catch (error) {
+            console.warn('사용량 추적 실패:', error);
+        }
     }
 
     // 템플릿 기능 바인딩
@@ -258,7 +280,6 @@ class PremiumManager {
         const proOnlyFeatures = [
             PREMIUM_FEATURES.CONTENT_EDIT,
             PREMIUM_FEATURES.TONE_ADJUSTMENT,
-            PREMIUM_FEATURES.OTHER_POST_CREATION,
             PREMIUM_FEATURES.POST_ENHANCEMENT,
             PREMIUM_FEATURES.IMAGE_EDITING
         ];
