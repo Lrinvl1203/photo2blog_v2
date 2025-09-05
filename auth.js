@@ -26,7 +26,7 @@ function initializeSupabase() {
 let authState = {
     user: null,
     isAuthenticated: false,
-    isPremium: false
+    isPro: false
 };
 
 // DOM 요소 ID 매핑
@@ -76,7 +76,7 @@ class AuthenticationManager {
             if (session?.user) {
                 authState.user = session.user;
                 authState.isAuthenticated = true;
-                authState.isPremium = this.checkPremiumStatus(session.user);
+                authState.isPro = this.checkProStatus(session.user);
                 this.updateUI(true);
             } else {
                 this.resetAuthState();
@@ -89,16 +89,16 @@ class AuthenticationManager {
         }
     }
 
-    // 프리미엄 상태 확인
-    checkPremiumStatus(user) {
-        return user.user_metadata?.premium === true || user.app_metadata?.premium === true;
+    // Pro plan 상태 확인
+    checkProStatus(user) {
+        return user.user_metadata?.pro === true || user.app_metadata?.pro === true;
     }
 
     // 인증 상태 리셋
     resetAuthState() {
         authState.user = null;
         authState.isAuthenticated = false;
-        authState.isPremium = false;
+        authState.isPro = false;
     }
 
     // UI 업데이트
@@ -168,7 +168,7 @@ class AuthenticationManager {
                     if (session?.user) {
                         authState.user = session.user;
                         authState.isAuthenticated = true;
-                        authState.isPremium = this.checkPremiumStatus(session.user);
+                        authState.isPro = this.checkProStatus(session.user);
                         this.updateUI(true);
                         this.hideAuthModal();
                     }
@@ -180,7 +180,7 @@ class AuthenticationManager {
                 case 'TOKEN_REFRESHED':
                     if (session?.user) {
                         authState.user = session.user;
-                        authState.isPremium = this.checkPremiumStatus(session.user);
+                        authState.isPro = this.checkProStatus(session.user);
                     }
                     break;
             }
@@ -274,7 +274,7 @@ class AuthenticationManager {
                     password,
                     options: {
                         data: {
-                            premium: false // 기본값으로 일반 사용자
+                            pro: false // 기본값으로 Free plan 사용자
                         }
                     }
                 });
@@ -385,18 +385,18 @@ window.authUtils = {
     // 인증 상태 확인
     isAuthenticated: () => authState.isAuthenticated,
     
-    // 프리미엄 사용자 확인
-    isPremiumUser: () => authState.isPremium,
+    // Pro plan 사용자 확인
+    isProUser: () => authState.isPro,
     
     // 인증이 필요한 기능을 위한 가드 함수
-    requireAuth: (callback, premiumOnly = false) => {
+    requireAuth: (callback, proOnly = false) => {
         if (!authState.isAuthenticated) {
             if (authManager) authManager.showAuthModal();
             return false;
         }
         
-        if (premiumOnly && !authState.isPremium) {
-            alert('프리미엄 구독이 필요한 기능입니다.');
+        if (proOnly && !authState.isPro) {
+            alert('Pro plan 구독이 필요한 기능입니다.');
             return false;
         }
         
@@ -433,7 +433,7 @@ window.authTest = {
                 email: email,
                 password: password,
                 options: {
-                    data: { premium: false }
+                    data: { pro: false }
                 }
             });
             console.log('회원가입 결과:', { data, error });

@@ -1,0 +1,387 @@
+/* 마이페이지 모달 스타일 */
+.mypage-modal {
+    max-width: 800px !important;
+    width: 95% !important;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* 탭 네비게이션 */
+.mypage-tabs {
+    display: flex;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 2rem;
+    gap: 0.5rem;
+}
+
+.mypage-tab {
+    padding: 0.75rem 1rem;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.mypage-tab:hover {
+    color: var(--primary-color);
+    background: var(--background-secondary);
+}
+
+.mypage-tab.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+    background: var(--background-secondary);
+}
+
+.mypage-tab-content {
+    display: none;
+}
+
+.mypage-tab-content.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 프로필 섹션 */
+.profile-card {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 2rem;
+    background: var(--background-secondary);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+}
+
+.profile-avatar {
+    width: 80px;
+    height: 80px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: white;
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-email {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.profile-join-date {
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+
+.tier-badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.tier-badge.free {
+    background: var(--border);
+    color: var(--text-secondary);
+}
+
+.tier-badge.pro {
+    background: var(--primary-color);
+    color: white;
+}
+
+/* 구독 관리 섹션 */
+.subscription-section {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.current-plan {
+    padding: 2rem;
+    background: var(--background-secondary);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+}
+
+.current-plan h3 {
+    margin: 0 0 1rem 0;
+    color: var(--text-primary);
+}
+
+.plan-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.plan-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.plan-price {
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.plan-expires {
+    color: var(--text-secondary);
+}
+
+.subscription-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.plan-features {
+    padding: 1.5rem;
+    background: var(--background-secondary);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+.plan-features h4 {
+    margin: 0 0 1rem 0;
+    color: var(--text-primary);
+}
+
+.plan-features ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.plan-features li {
+    padding: 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.plan-features li:not(:last-child) {
+    border-bottom: 1px solid var(--border);
+}
+
+/* 기능 비교 섹션 */
+.feature-comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.feature-section {
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+.feature-section h5 {
+    margin: 0 0 1rem 0;
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.feature-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.feature-section li {
+    padding: 0.5rem 0;
+    font-size: 0.875rem;
+}
+
+.feature-section:first-child {
+    background: rgba(34, 197, 94, 0.05);
+    border-color: rgba(34, 197, 94, 0.2);
+}
+
+.feature-section:last-child {
+    background: var(--background-secondary);
+}
+
+@media (max-width: 768px) {
+    .feature-comparison {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
+/* 사용량 섹션 */
+.usage-section h3 {
+    margin: 0 0 1.5rem 0;
+    color: var(--text-primary);
+}
+
+.usage-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.usage-item {
+    padding: 1.5rem;
+    background: var(--background-secondary);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+.usage-label {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+}
+
+.usage-progress {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.progress-bar {
+    flex: 1;
+    height: 8px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--primary-color);
+    transition: width 0.3s ease;
+}
+
+.usage-text {
+    font-weight: 500;
+    color: var(--text-secondary);
+    min-width: 60px;
+}
+
+/* 구매내역 섹션 */
+.history-section h3 {
+    margin: 0 0 1.5rem 0;
+    color: var(--text-primary);
+}
+
+.history-list {
+    min-height: 200px;
+}
+
+.history-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.history-item {
+    padding: 1rem;
+    background: var(--background-secondary);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    margin-bottom: 1rem;
+}
+
+.history-date {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.history-plan {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.history-amount {
+    font-weight: 500;
+    color: var(--primary-color);
+}
+
+.history-status {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-left: 0.5rem;
+}
+
+.history-status.success {
+    background: rgba(34, 197, 94, 0.1);
+    color: rgb(34, 197, 94);
+}
+
+.history-status.pending {
+    background: rgba(251, 191, 36, 0.1);
+    color: rgb(251, 191, 36);
+}
+
+.history-status.failed {
+    background: rgba(239, 68, 68, 0.1);
+    color: rgb(239, 68, 68);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .mypage-modal {
+        width: 98% !important;
+        margin: 1rem;
+    }
+    
+    .mypage-tabs {
+        flex-wrap: wrap;
+        gap: 0.25rem;
+    }
+    
+    .mypage-tab {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+    }
+    
+    .profile-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    .subscription-actions {
+        flex-direction: column;
+    }
+    
+    .usage-progress {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+    
+    .usage-text {
+        text-align: center;
+    }
+}

@@ -2555,16 +2555,16 @@ ${photoDescriptions}`;
         }
 
         async function addContentToBlog() {
-            // 프리미엄 기능 체크
-            if (window.premiumUtils && !window.premiumUtils.checkFeature('content_edit')) {
-                window.premiumUtils.showUpgrade();
+            // Pro plan 기능 체크
+            if (window.proUtils && !window.proUtils.checkFeature('content_edit')) {
+                window.proUtils.showUpgrade();
                 return;
             }
 
             // 사용량 체크
-            if (window.premiumUtils && !window.premiumUtils.isPremium() && !window.premiumManager?.checkUsageLimits()) {
-                if (window.premiumManager) {
-                    window.premiumManager.showUsageLimitModal();
+            if (window.proUtils && !window.proUtils.isPro() && !window.proManager?.checkUsageLimits()) {
+                if (window.proManager) {
+                    window.proManager.showUsageLimitModal();
                 }
                 return;
             }
@@ -2617,8 +2617,8 @@ ${photoDescriptions}`;
                 showLoading(false);
                 
                 // 사용량 증가
-                if (window.premiumUtils) {
-                    window.premiumUtils.incrementUsage('request');
+                if (window.proUtils) {
+                    window.proUtils.incrementUsage('request');
                 }
                 
             } catch (error) {
@@ -2719,16 +2719,16 @@ Based on the guidelines and information above, please regenerate a complete blog
         }
 
         async function adjustTone() {
-            // 프리미엄 기능 체크
-            if (window.premiumUtils && !window.premiumUtils.checkFeature('content_edit')) {
-                window.premiumUtils.showUpgrade();
+            // Pro plan 기능 체크
+            if (window.proUtils && !window.proUtils.checkFeature('content_edit')) {
+                window.proUtils.showUpgrade();
                 return;
             }
 
             // 사용량 체크
-            if (window.premiumUtils && !window.premiumUtils.isPremium() && !window.premiumManager?.checkUsageLimits()) {
-                if (window.premiumManager) {
-                    window.premiumManager.showUsageLimitModal();
+            if (window.proUtils && !window.proUtils.isPro() && !window.proManager?.checkUsageLimits()) {
+                if (window.proManager) {
+                    window.proManager.showUsageLimitModal();
                 }
                 return;
             }
@@ -2757,8 +2757,8 @@ Based on the guidelines and information above, please regenerate a complete blog
                 showLoading(false);
                 
                 // 사용량 증가
-                if (window.premiumUtils) {
-                    window.premiumUtils.incrementUsage('request');
+                if (window.proUtils) {
+                    window.proUtils.incrementUsage('request');
                 }
                 
             } catch (error) {
@@ -2884,9 +2884,9 @@ Based on the guidelines and new tone requirements above, please rewrite the blog
 
         // 포스팅 강화 기능들
         function openEnhanceModal() {
-            // 프리미엄 기능 체크
-            if (window.premiumUtils && !window.premiumUtils.checkFeature('post_enhancement')) {
-                window.premiumUtils.showUpgrade();
+            // Pro plan 기능 체크
+            if (window.proUtils && !window.proUtils.checkFeature('post_enhancement')) {
+                window.proUtils.showUpgrade();
                 return;
             }
 
@@ -4641,11 +4641,11 @@ ${gaps.recommendations.join('\n')}
                             </div>
                             <ul class="feature-list">
                                 <li class="included">✅ Free Plan 모든 기능</li>
-                                <li class="included premium">💎 콘텐츠 추가/수정</li>
-                                <li class="included premium">💎 톤 조절</li>
-                                <li class="included premium">💎 다른 블로그 포스트 만들기</li>
-                                <li class="included premium">💎 포스팅 강화</li>
-                                <li class="included premium">💎 이미지 수정</li>
+                                <li class="included pro">💎 콘텐츠 추가/수정</li>
+                                <li class="included pro">💎 톤 조절</li>
+                                <li class="included pro">💎 다른 블로그 포스트 만들기</li>
+                                <li class="included pro">💎 포스팅 강화</li>
+                                <li class="included pro">💎 이미지 수정</li>
                                 <li class="included">✅ 무제한 사용</li>
                                 <li class="included">✅ 우선 처리</li>
                             </ul>
@@ -4841,12 +4841,12 @@ ${gaps.recommendations.join('\n')}
                                 </div>
                                 
                                 <div class="usage-item">
-                                    <div class="usage-label">Premium 기능 사용</div>
+                                    <div class="usage-label">Pro plan 기능 사용</div>
                                     <div class="usage-progress">
                                         <div class="progress-bar">
-                                            <div class="progress-fill" id="premiumUsageProgress" style="width: 0%"></div>
+                                            <div class="progress-fill" id="proUsageProgress" style="width: 0%"></div>
                                         </div>
-                                        <span class="usage-text" id="premiumUsageText">0 / ∞</span>
+                                        <span class="usage-text" id="proUsageText">0 / ∞</span>
                                     </div>
                                 </div>
                                 
@@ -4882,7 +4882,7 @@ ${gaps.recommendations.join('\n')}
 
     <!-- Auth CSS -->
     <link rel="stylesheet" href="auth.css">
-    <link rel="stylesheet" href="premium.css">
+    <link rel="stylesheet" href="pro.css">
     <link rel="stylesheet" href="image-editor.css">
     <link rel="stylesheet" href="toss-payments.css">
     <link rel="stylesheet" href="mypage.css">
@@ -4894,7 +4894,7 @@ ${gaps.recommendations.join('\n')}
     <!-- Mock Auth for testing (commented out for real auth) -->
     <!-- <script src="auth-mock.js"></script> -->
     <script src="auth.js"></script>
-    <script src="premium.js"></script>
+    <script src="pro.js"></script>
     <script src="image-editor.js"></script>
     <script src="toss-payments.js"></script>
     <script src="mypage.js"></script>

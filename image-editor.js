@@ -197,10 +197,10 @@ async function applyImageEdit() {
         return;
     }
 
-    // API 키 확인
-    const apiKey = localStorage.getItem('geminiApiKey');
+    // API 키 확인 (index.html과 동일한 키 사용)
+    const apiKey = localStorage.getItem('gemini_api_key');
     if (!apiKey) {
-        showNotification('Google AI Studio API 키가 설정되지 않았습니다.', 'error');
+        showNotification('Google AI Studio API 키가 설정되지 않았습니다. 🔑 API 버튼을 클릭해서 설정해주세요.', 'error');
         return;
     }
 
@@ -271,12 +271,28 @@ async function convertImageToBase64(imageSrc) {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             
-            canvas.width = img.naturalWidth;
-            canvas.height = img.naturalHeight;
+            // 할당량 절약을 위한 이미지 크기 최적화 (최대 1024px)
+            const maxSize = 1024;
+            let width = img.naturalWidth;
+            let height = img.naturalHeight;
             
-            ctx.drawImage(img, 0, 0);
+            if (width > maxSize || height > maxSize) {
+                if (width > height) {
+                    height = (height * maxSize) / width;
+                    width = maxSize;
+                } else {
+                    width = (width * maxSize) / height;
+                    height = maxSize;
+                }
+            }
             
-            const base64 = canvas.toDataURL('image/jpeg', 0.8);
+            canvas.width = width;
+            canvas.height = height;
+            
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            // 품질을 0.7로 낮춰서 파일 크기 최적화
+            const base64 = canvas.toDataURL('image/jpeg', 0.7);
             const base64Data = base64.split(',')[1];
             resolve(base64Data);
         };
@@ -323,13 +339,14 @@ async function callGeminiImageEdit(base64Data, mimeType, prompt, apiKey) {
                     }
                 },
                 {
-                    text: `Please edit this image based on the following request: ${prompt}. Maintain the overall composition but apply the requested changes naturally and realistically.`
+                    text: `Edit this image: ${prompt}. Keep natural look.`
                 }
             ]
         }],
         generationConfig: {
-            temperature: 0.4,
-            maxOutputTokens: 8192,
+            temperature: 0.3,
+            maxOutputTokens: 4096,
+            candidateCount: 1
         },
         safetySettings: [
             {
@@ -338,6 +355,14 @@ async function callGeminiImageEdit(base64Data, mimeType, prompt, apiKey) {
             },
             {
                 category: "HARM_CATEGORY_HATE_SPEECH", 
+                threshold: "BLOCK_MEDIUM_AND_ABOVE"
+            },
+            {
+                category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                threshold: "BLOCK_MEDIUM_AND_ABOVE"
+            },
+            {
+                category: "HARM_CATEGORY_DANGEROUS_CONTENT",
                 threshold: "BLOCK_MEDIUM_AND_ABOVE"
             }
         ]
@@ -354,7 +379,14 @@ async function callGeminiImageEdit(base64Data, mimeType, prompt, apiKey) {
 
         if (!response.ok) {
             const errorData = await response.json().catch(() => null);
-            throw new Error(errorData?.error?.message || `API 요청 실패: ${response.status}`);
+            const errorMessage = errorData?.error?.message || '';
+            
+            // 할당량 초과 에러 처리
+            if (response.status === 429 || errorMessage.includes('quota') || errorMessage.includes('exceeded')) {
+                throw new Error(`🚫 Google AI Studio 무료 할당량이 초과되었습니다.\n\n해결방법:\n1. 몇 시간 후 다시 시도해보세요\n2. Google AI Studio에서 유료 플랜으로 업그레이드\n3. 새로운 API 키 발급 후 재설정\n\n자세한 정보: https://ai.google.dev/gemini-api/docs/rate-limits`);
+            }
+            
+            throw new Error(errorMessage || `API 요청 실패: ${response.status}`);
         }
 
         const data = await response.json();
